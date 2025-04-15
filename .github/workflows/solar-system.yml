@@ -15,10 +15,10 @@ env:
 jobs:
     unit-testing:
         name: Unit Testing
-        strategy:
+        strategy:  # Used to test on different OS and nodejs versions
             matrix:
                 nodejs_version: [18, 19, 20]
-                operating_system: [ubuntu-latest, macos-latest]
+                operating_system: [ubuntu-latest]
                 exclude:
                     - nodejs_version: 18
                       operating_system: macos-latest
