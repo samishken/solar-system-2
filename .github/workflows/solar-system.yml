@@ -31,6 +31,11 @@ jobs:
           uses: actions/setup-node@v3
           with:
             node-version: ${{ matrix.nodejs_version }}
+
+        - name: Composite Action - Cache & Install NPM Packages
+          uses: ./.github/custom-actions/npm-action
+          with:
+            path-of-folder: node_modules             
         
         - name: Install Dependencies
           run: npm install
@@ -69,4 +74,19 @@ jobs:
             name: Code-Coverage-Result
             path: coverage
             retention-days: 5
-        
+
+    docker:
+      name: Containerization
+      needs: [unit-testing, code-coverage]
+      permissions: 
+          packages: write
+      runs-on: ubuntu-latest
+      steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Dockerhub Login
+        uses: docker/login-action@v2.2.0
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
