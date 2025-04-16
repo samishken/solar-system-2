@@ -18,7 +18,7 @@ jobs:
         strategy:  # Used to test on different OS and nodejs versions
             matrix:
                 nodejs_version: [18, 20]  # can add 18 & 19
-                operating_system: [ubuntu-latest, ubuntu-22.04, ubuntu-20.04]  # can add OS
+                operating_system: [ubuntu-latest, macos-latest]  # can add OS
                 exclude:
                     - nodejs_version: 18
                       operating_system: macos-latest
