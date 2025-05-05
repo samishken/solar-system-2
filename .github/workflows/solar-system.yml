@@ -16,7 +16,7 @@ jobs:
     unit-testing:
         name: Unit Testing
         strategy:  # Used to test on different OS and nodejs versions
-            matrix:
+            matrix:  # matrix strategy is used to run the same job with different parameters. it's important because it allows us to test the code on different environments.
                 nodejs_version: [18]  # can add 18 & 19
                 operating_system: [ubuntu-latest, macos-latest]  # can add OS
                 exclude:
@@ -32,9 +32,12 @@ jobs:
           with:
             node-version: ${{ matrix.nodejs_version }}
         
-        - name: Install Dependencies
-          run: npm install
-        
+        # - name: Install Dependencies
+        #   run: npm install
+        - name: Composite Action - Cache & Install NPM Packages
+          uses: ./.github/custom-actions/npm-action
+          with:
+            path-of-folder: node_modules 
         - name: Unit Testing
           run: npm test
 
@@ -56,9 +59,12 @@ jobs:
           with:
             node-version: 18
 
-        - name: Install Dependencies
-          run: npm install   
-
+        # - name: Install Dependencies
+        #   run: npm install   
+        - name: Composite Action - Cache & Install NPM Packages
+          uses: ./.github/custom-actions/npm-action
+          with:
+            path-of-folder: node_modules
         - name: Check Code Coverage
           continue-on-error: true   # skip if there's an error
           run: npm run coverage
