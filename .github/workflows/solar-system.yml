@@ -108,3 +108,10 @@ jobs: # jobs are the main building blocks of a workflow. each job runs in a fres
             
             echo Testing Image URL using wget 
             wget -q -O - 127.0.0.1:3000/live | grep live
+
+        - name: Docker Push
+          uses: docker/build-push-action@v6
+          with:
+            context: .  # context is the path to the Dockerfile. it can be a local path or a URL.
+            push: true  # set to false if you don't want to push the image to Docker Hub
+            tags: ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }} 
