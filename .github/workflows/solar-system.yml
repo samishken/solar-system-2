@@ -7,12 +7,12 @@ on:
       - main
       - 'feature/*'
 
-env:
+env:  # environment variables are variables that are available to all jobs and steps in the workflow. they are defined at the top level of the workflow file.
     MONGO_URI: 'mongodb+srv://supercluster.d83jj.mongodb.net/superData'
     MONGO_USERNAME: ${{ vars.MONGO_USERNAME }}
     MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}  
 
-jobs:
+jobs: # jobs are the main building blocks of a workflow. each job runs in a fresh instance of the virtual environment and can run in parallel or sequentially.
     unit-testing:
         name: Unit Testing
         strategy:  # Used to test on different OS and nodejs versions
@@ -32,9 +32,7 @@ jobs:
           with:
             node-version: ${{ matrix.nodejs_version }}
         
-        # - name: Install Dependencies
-        #   run: npm install
-        - name: Composite Action - Cache & Install NPM Packages
+        - name: Composite Action - Cache & Install NPM Packages   # Chaching to speed up the workflow
           uses: ./.github/custom-actions/npm-action
           with:
             path-of-folder: node_modules 
@@ -48,6 +46,7 @@ jobs:
             name: Mocha-Test-Result
             path: test-results.xml
     code-coverage:
+    
         name: Code Coverage
         runs-on: ubuntu-latest
         steps:
@@ -55,13 +54,11 @@ jobs:
           uses: actions/checkout@v4
 
         - name: Setup NodeJS Version - 18
-          uses: actions/setup-node@v4
+          uses: actions/setup-node@v4 # this a
           with:
             node-version: 18
 
-        # - name: Install Dependencies
-        #   run: npm install   
-        - name: Composite Action - Cache & Install NPM Packages
+        - name: Composite Action - Cache & Install NPM Packages    # Chaching to speed up the workflow
           uses: ./.github/custom-actions/npm-action
           with:
             path-of-folder: node_modules
@@ -75,4 +72,16 @@ jobs:
             name: Code-Coverage-Result
             path: coverage
             retention-days: 5
-        
+    docker:
+        name: Containerization
+        needs: [unit-testing, code-coverage]  # this job will run after the unit-testing and code-coverage jobs are completed successfully
+        runs-on: ubuntu-latest
+        steps:
+        - name: Checkout Repository
+          uses: actions/checkout@v4
+
+        - name: Login to Docker Hub
+          uses: docker/login-action@v3.4.0
+          with:
+            username: ${{ vars.DOCKER_USERNAME }}
+            password: ${{ secrets.DOCKER_PASSWORD }}
