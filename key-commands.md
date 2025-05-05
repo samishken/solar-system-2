@@ -10,6 +10,7 @@
 
 ---
 # Github Action Pipeline workflow
+ * Key (.github/workflows) file to store the workflow yaml file.
  1) "Name" of workflow
  2) "on" is used to specify the events that trigger the workflow.
  3) "env" are # environment variables are variables that are available to all jobs and steps in the workflow. they are defined at the top level of the workflow file.
@@ -33,6 +34,8 @@
 ---
 # Expressions
 
-- `continue-on-error: true`              # skip if there's an error
-- `if:  always()`                        # excute even the previous step fails
+- `continue-on-error: true`               # skip if there's an error
+- `if:  always()`                         # excute even the previous step fails
 - `needs: [unit-testing, code-coverage]`  # this job will run after the unit-testing and code-coverage jobs are completed successfully
+- `context: .`  # context is the path to the Dockerfile. it can be a local path or a URL.
+-  `permissions: packages: write `        # In case of adding images to GHCR this job will have write access to the package registries
