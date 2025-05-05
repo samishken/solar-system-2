@@ -15,6 +15,15 @@ env:  # environment variables are variables that are available to all jobs and s
 jobs: # jobs are the main building blocks of a workflow. each job runs in a fresh instance of the virtual environment and can run in parallel or sequentially.
     unit-testing:
         name: Unit Testing
+        services:
+          mongo-db:
+            image: siddharth67/mongo-db:non-prod
+            ports:
+              - 27017:27017
+        env:
+            MONGO_URI: 'mongodb://localhost:27017/superData'
+            MONGO_USERNAME: non-prod-user
+            MONGO_PASSWORD: non-prod-password
         strategy:  # Used to test on different OS and nodejs versions
             matrix:  # matrix strategy is used to run the same job with different parameters. it's important because it allows us to test the code on different environments.
                 nodejs_version: [18]  # can add 18 & 19
@@ -48,6 +57,18 @@ jobs: # jobs are the main building blocks of a workflow. each job runs in a fres
     code-coverage:
     
         name: Code Coverage
+        container: # job container is a lightweight, stand-alone, executable package of software that includes everything needed to run a piece of software, including the code, runtime, libraries, and system tools. it allows us to run the job in a specific environment without having to set up the environment on the host machine.
+        # this is useful for running jobs that require a specific version of a language or framework, or for running jobs that require a specific set of dependencies.
+          image: node:18
+        services:  # services are containers that are started before the job runs and are available to the job during its execution. they are useful for running databases or other services that the job depends on. 
+          mongo-db:
+            image: siddharth67/mongo-db:non-prod
+            options: 
+                --name mongo
+        env:
+            MONGO_URI: 'mongodb://mongo:27017/superData'
+            MONGO_USERNAME: non-prod-user
+            MONGO_PASSWORD: non-prod-password
         runs-on: ubuntu-latest
         steps:
         - name: Checkout Repository
@@ -75,6 +96,9 @@ jobs: # jobs are the main building blocks of a workflow. each job runs in a fres
     docker:
         name: Containerization
         needs: [unit-testing, code-coverage]  # this job will run after the unit-testing and code-coverage jobs are completed successfully
+        permissions:
+          packages: write  # this job will have write access to the package registries
+
         runs-on: ubuntu-latest
         steps:
         - name: Checkout Repository
@@ -85,6 +109,13 @@ jobs: # jobs are the main building blocks of a workflow. each job runs in a fres
           with:
             username: ${{ vars.DOCKER_USERNAME }}
             password: ${{ secrets.DOCKER_PASSWORD }}
+
+        - name: GHCR Login
+          uses: docker/login-action@v3.4.0
+          with:
+            registry: ghcr.io
+            username: ${{ github.repository_owner }}
+            password: ${{ secrets.GITHUB_TOKEN }}
 
         - name: Docker Build For Testing
           uses: docker/build-push-action@v6
@@ -114,4 +145,6 @@ jobs: # jobs are the main building blocks of a workflow. each job runs in a fres
           with:
             context: .  # context is the path to the Dockerfile. it can be a local path or a URL.
             push: true  # set to false if you don't want to push the image to Docker Hub
-            tags: ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }} 
+            tags: |    # push image to docker hub and ghcr 
+              ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }}   
+              ghcr.io/${{ github.repository_owner }}/solar-system:${{ github.sha }}   
