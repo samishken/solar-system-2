@@ -124,6 +124,6 @@ jobs: # jobs are the main building blocks of a workflow. each job runs in a fres
           with:
             context: .  # context is the path to the Dockerfile. it can be a local path or a URL.
             push: true  # set to false if you don't want to push the image to Docker Hub
-            tags: |
-              ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }}  ## push to Docker Hub
-              ghcr.io/${{ github.repository_owner }}/solar-system:${{ github.sha }}  ## push to GitHub Container Registry
+            tags: |    # push image to docker hub and ghcr 
+              ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }}   
+              ghcr.io/${{ github.repository_owner }}/solar-system:${{ github.sha }}   
