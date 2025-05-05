@@ -15,6 +15,15 @@ env:  # environment variables are variables that are available to all jobs and s
 jobs: # jobs are the main building blocks of a workflow. each job runs in a fresh instance of the virtual environment and can run in parallel or sequentially.
     unit-testing:
         name: Unit Testing
+        services:
+          mongo-db:
+            image: siddharth67/mongo-db:non-prod
+            ports:
+              - 27017:27017
+        env:
+            MONGO_URI: 'mongodb://localhost:27017/superData'
+            MONGO_USERNAME: non-prod-user
+            MONGO_PASSWORD: non-prod-password
         strategy:  # Used to test on different OS and nodejs versions
             matrix:  # matrix strategy is used to run the same job with different parameters. it's important because it allows us to test the code on different environments.
                 nodejs_version: [18]  # can add 18 & 19
@@ -48,6 +57,18 @@ jobs: # jobs are the main building blocks of a workflow. each job runs in a fres
     code-coverage:
     
         name: Code Coverage
+        container: # job container is a lightweight, stand-alone, executable package of software that includes everything needed to run a piece of software, including the code, runtime, libraries, and system tools. it allows us to run the job in a specific environment without having to set up the environment on the host machine.
+        # this is useful for running jobs that require a specific version of a language or framework, or for running jobs that require a specific set of dependencies.
+          image: node:18
+        services:  # services are containers that are started before the job runs and are available to the job during its execution. they are useful for running databases or other services that the job depends on. 
+          mongo-db:
+            image: siddharth67/mongo-db:non-prod
+            options: 
+                --name mongo
+        env:
+            MONGO_URI: 'mongodb://mongo:27017/superData'
+            MONGO_USERNAME: non-prod-user
+            MONGO_PASSWORD: non-prod-password
         runs-on: ubuntu-latest
         steps:
         - name: Checkout Repository

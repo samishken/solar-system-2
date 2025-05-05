@@ -7,6 +7,14 @@
 - Re-use dependencies
 - `cache action` when a job is triggered if `cache` is available it'll skip steps which makes the workflow run faster.
 
+## Job containers and service containers
+#### Service containers to overcome production database issues.
+- Ideally we want to run sample (mock) database in testing or code coverage stages.
+- We do not want to use Producation database for testing or codecoverage purpose. 
+- services are containers that are started before the job runs and are available to the job during its execution. they are useful for running databases or other services that the job depends on. 
+
+#### Job containers 
+- job container is a lightweight, stand-alone, executable package of software that includes everything needed to run a piece of software, including the code, runtime, libraries, and system tools. it allows us to run the job in a specific environment without having to set up the environment on the host machine.  this is useful for running jobs that require a specific version of a language or framework, or for running jobs that require a specific set of dependencies. 
 
 ---
 # Github Action Pipeline workflow
