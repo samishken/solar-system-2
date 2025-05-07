@@ -158,16 +158,16 @@ jobs: # jobs are the main building blocks of a workflow. each job runs in a fres
         - name: Checkout Repository
           uses: actions/checkout@v4
         
-        - name: Install Kubectl from Azure
+        - name: Install Kubectl CLI from Azure
           uses: azure/setup-kubectl@v4
           with:
              version: 'v1.32.0' # default is latest stable
         
-        - name: Set Kubeconfig
+        - name: Set Kubeconfig FILE
           uses: azure/k8s-set-context@v4
           with:
             method: kubeconfig
-            kubeconfig: {{ secrets.KUBECONFIG }}
+            kubeconfig: ${{ secrets.KUBECONFIG }}
 
         - name: Fetch Kubernetes Cluster details
           run: |
