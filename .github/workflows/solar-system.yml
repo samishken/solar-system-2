@@ -171,7 +171,7 @@ jobs: # jobs are the main building blocks of a workflow. each job runs in a fres
 
         - name: Fetch Kubernetes Cluster details
           run: |
-            kubectl version -short 
+            kubectl version
             echo ----------------------
             kubectl get nodes -o wide
 
