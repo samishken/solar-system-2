@@ -94,6 +94,7 @@ jobs: # jobs are the main building blocks of a workflow. each job runs in a fres
             path: coverage
             retention-days: 5
     docker:
+
         name: Containerization
         needs: [unit-testing, code-coverage]  # this job will run after the unit-testing and code-coverage jobs are completed successfully
         permissions:
@@ -148,3 +149,32 @@ jobs: # jobs are the main building blocks of a workflow. each job runs in a fres
             tags: |    # push image to docker hub and ghcr 
               ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }}   
               ghcr.io/${{ github.repository_owner }}/solar-system:${{ github.sha }}   
+
+    dev-deploy:
+        name: Deploy to Dev Environment
+        needs: [docker]  # this job will run after the docker job is completed successfully
+        runs-on: ubuntu-latest
+        steps:
+        - name: Checkout Repository
+          uses: actions/checkout@v4
+        
+        - name: Install Kubectl from Azure
+          uses: azure/setup-kubectl@v4
+          with:
+             version: 'v1.32.0' # default is latest stable
+        
+        - name: Set Kubeconfig
+          uses: azure/k8s-set-context@v4
+          with:
+            method: kubeconfig
+            kubeconfig: {{ secrets.KUBECONFIG }}
+
+        - name: Fetch Kubernetes Cluster details
+          run: |
+            kubectl version --short 
+            echo ----------------------
+            kubectl get nodes -o wide
+
+
+
+    

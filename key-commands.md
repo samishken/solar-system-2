@@ -31,12 +31,25 @@
     - Cache: Chaching to speed up the workflow
     - Unit testing
     - Archive test results
+    - Ensure I don't run production database in Unit testing by using Service containers, Job containers
 
  6) Code coverage
     - Checkout Repository
     - Cache: Chaching to speed up the workflow
     - Check code coverate (continue-on-error)
     - Archive test results
+    - Ensure I don't run production database in Unit testing by using Service containers, Job containers
+  
+ 7) Continues Integration
+    - `needs` Code coverage & unit testing
+    - Docker (tag, deploy, scan for images)
+    - Login to Docker
+    - Docker build
+    - Docker Image Testing
+    - Docker push
+ 8) Continues Deployment
+    - Deploy to Dev kubernetes
+    - 
 
 
 ---
