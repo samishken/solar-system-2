@@ -170,9 +170,7 @@ jobs: # jobs are the main building blocks of a workflow. each job runs in a fres
             kubeconfig: ${{ secrets.KUBECONFIG }}
 
         - name: Fetch Kubernetes Cluster details
-          run: |
-            aws eks update-kubeconfig --region us-east-1 --name demo-otel-microservices
-            echo ----------------------
+          run: |   # TEST: kubectl config use-context minikube  | minikube start
             kubectl version
             echo ----------------------
             kubectl get nodes -o wide
