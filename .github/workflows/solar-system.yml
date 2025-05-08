@@ -163,23 +163,57 @@ jobs: # jobs are the main building blocks of a workflow. each job runs in a fres
           with:
              version: 'v1.32.0' # default is latest stable
         
-        - name: Set Kubeconfig FILE
+        # KUBECONFIG is required to connect to the Kubernetes cluster. it is a file that contains the configuration information for the kubectl command-line tool. it is used to connect to the Kubernetes cluster and perform operations on it.
+        # kubeconfig is file is required by kubectl in order to connect with the cluster and communicate with it.  
+        - name: Set Kubeconfig FILE   
           uses: azure/k8s-set-context@v4
           with:
             method: kubeconfig
             kubeconfig: ${{ secrets.KUBECONFIG }}
         
-        - name: Configure AWS credentials
+        - name: Configure AWS credentials for EKS 
           uses: aws-actions/configure-aws-credentials@v4
           with:
             aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
             aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             aws-region: ${{ vars.AWS_REGION }}
-        - name: Fetch Kubernetes Cluster details
+        - name: Fetch Kubernetes Cluster details   # test if KUBECONFIG is set correctly configured
           run: |   # TEST: kubectl config use-context minikube  | minikube start
             kubectl version
             echo ----------------------
             kubectl get nodes -o wide
+
+        - name: Replace Token in Manifest File
+          uses: cschleiden/replace-tokens@v1
+          with:
+            tokenPrefix: '{'
+            tokenSuffix: '}'
+            files: '["kubernetes/development/*.yaml"]'
+          env:
+            NAMESPACE: ${{ vars.NAMESPACE }}
+            REPLICAS: ${{ vars.REPLICAS }}
+            IMAGE: ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
+
+        - name: Save Nginx Ingress Controller IP as a GITHUB Environment Variable
+          run: |
+            echo "INGRESS_IP=$(kubectl -n ingress-nginx get services ingress-nginx-controller -o jsonpath="{.status.loadBalancer.ingress[0].ip}")" >> $GITHUB_ENV
+        
+        - name: Replace Token in Manifest files
+          uses: cschleiden/replace-tokens@v1
+          with:
+            tokenPrefix: '_{_'
+            tokenSuffix: '_}_'
+            files: '["kubernetes/development/*.yaml"]'
+          env:
+            NAMESPACE: ${{ vars.NAMESPACE }}
+            REPLICAS: ${{ vars.REPLICAS }}
+            IMAGE: ${{ vars.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
+            INGRESS_IP:  ${{ env.INGRESS_IP }}
+
+        - name: Check files
+          run: |
+            cat kubernetes/development/*.yaml
+
 
 
 
