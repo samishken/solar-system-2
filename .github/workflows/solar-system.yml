@@ -171,6 +171,9 @@ jobs: # jobs are the main building blocks of a workflow. each job runs in a fres
 
         - name: Fetch Kubernetes Cluster details
           run: |
+            aws eks update-kubeconfig --region us-east-1 --name demo-otel-microservices
+            echo ----------------------
+            kubectl version
             echo ----------------------
             kubectl get nodes -o wide
 
